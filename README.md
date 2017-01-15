@@ -1,0 +1,1 @@
+# VAT_binary_mnist
