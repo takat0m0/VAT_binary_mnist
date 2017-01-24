@@ -30,11 +30,11 @@ def _test(sess, model, test_file):
     return float(ok_cnt)/float(cnt)
         
 if __name__ == u'__main__':
-    
-    #file_name = 'mnist_test.csv'
-    #file_name = 'mnist_mini.csv'
-    file_name = 'for_train.csv'
-    test_file = 'for_test.csv'
+
+    labeled_file = 'labeled.csv'
+    unlabeled_file = 'unlabeled.csv'
+
+    test_file = 'mnist_test.csv'
     
     dump_dir = 'sample_result'
     if os.path.exists(dump_dir) == False:
@@ -43,23 +43,28 @@ if __name__ == u'__main__':
     # parameter
     batch_size = 100
     layer_list = [28 * 28 * 1, 1200, 600, 300, 150, 10]
+    #layer_list = [28 * 28 * 1, 1200, 600, 10]
     epoch_num = 100
     
     # make model
     model = Model(layer_list, batch_size)
     model.set_model()
-    
-    num_one_epoch = sum(1 for _ in open(file_name)) //batch_size
+
+    # get_label
+    with open(labeled_file, 'r') as f_obj:
+        labels, labeled_figs = get_batch(f_obj, 100)
+        
+    num_one_epoch = sum(1 for _ in open(unlabeled_file)) //batch_size
     with tf.Session() as sess:
         init = tf.global_variables_initializer()
         sess.run(init)
         for epoch in range(epoch_num):
-            with open(file_name, 'r') as f_obj:
+            with open(unlabeled_file, 'r') as f_obj:
                 for step in range(num_one_epoch):
                     batch_labels, batch_figs = get_batch(f_obj, batch_size)
-                    model.training_label(sess, batch_figs, batch_labels)
-                    model.training_unlabel(sess, batch_figs)
+                    #model.training(sess, labeled_figs, batch_figs, labels)
+                    model.training(sess, batch_figs, batch_figs, batch_labels)
 
-                        
+            model.change_lr(sess)
             ratio = _test(sess, model, test_file)
             print('epoch {}: ratio = {}'.format(epoch, ratio))

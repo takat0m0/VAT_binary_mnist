@@ -4,7 +4,8 @@ import os
 import sys
 
 def zero_or_not(target):
-    return 1 if target > 0 else 0
+    #return 1 if target > 0 else 0
+    return target/255.0
 
 def line2label_fig(l):
     zeros = [0.0] * 10
